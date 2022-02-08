@@ -39,6 +39,33 @@ void insertToHead(LinkedList *myList, char *word)
   myList->head = newNode;
 }
 
+Node *locate(LinkedList *myList, char *word)
+{
+  Node *ptr = myList->head;
+  while(ptr!=NULL)
+  {
+    if(strcmp(word,ptr->word)==0)
+      return ptr;
+    else
+      ptr = ptr->next;
+  }
+  return NULL;
+}
+
+void printList(LinkedList *myList)
+{
+  if(myList->head==NULL)
+  {
+    printf("empty list!!!\n");
+    return;
+  }
+  Node *ptr = myList->head;
+  while(ptr!=NULL)
+  {
+    printf("%s\n",ptr->word);
+    ptr=ptr->next;
+  }
+}
 
 // open hash----------------------------------------------------------
   // int value will be char word
@@ -87,6 +114,22 @@ void insert(OpenHashTable *hashTable, char *word,int size)
   hashTable->table[position] = initNode(word, hashTable->table[position]);
 }
 
+// open hash isMember--------------------------------------------------
+
+int isMember(OpenHashTable *hashTable, char *word, int size)
+{
+  int position = hashWord(word, size);
+  Node *ptr = hashTable->table[position];
+  while(ptr!=NULL)
+  {
+    if(!strcmp(word,ptr->word))
+      return 1;
+    else
+      ptr = ptr->next;
+  }
+  return 0;
+}
+
 /**********************************************************************/
 int main(int argc, char **argv)
 {
@@ -123,9 +166,10 @@ int main(int argc, char **argv)
 
     //Printing line count for debugging purposes.
     //You can remove this part from your submission.
-    printf("%d\n",numOfWords);
+    //printf("Number of words in words.txt %d\n",numOfWords);
     
     //HINT: You can initialize your hash table here, since you know the size of the dictionary
+
     /**********************************************************************/
     /**********************************************************************/
 
@@ -135,6 +179,7 @@ int main(int argc, char **argv)
 
     /**********************************************************************/
     /**********************************************************************/
+
     //rewind file pointer to the beginning of the file, to be able to read it line by line.
     fseek(fp, 0, SEEK_SET);
 
@@ -146,6 +191,7 @@ int main(int argc, char **argv)
         //printf("%d: %s\n",i,wrd);
         
         //HINT: here is a good place to insert the words into your hash table
+
         /**********************************************************************/
         /**********************************************************************/
 
@@ -155,9 +201,13 @@ int main(int argc, char **argv)
         /**********************************************************************/
     }
     fclose(fp);
+
+
+
     /**********************************************************************/
     /**********************************************************************/
     // Print HashTable
+    /*
     for(int k=0; k < hashSize; k++)
     {
       printf("Row %d: [",k);
@@ -169,8 +219,13 @@ int main(int argc, char **argv)
       }
       printf(" ]\n");
     }
+    */
+     //printf("Number of positions in hash table %d\n",hashSize);
     /**********************************************************************/
     /**********************************************************************/
+
+
+
 	////////////////////////////////////////////////////////////////////
 	//read the input text file word by word
     fp = fopen(inputFilePath, "r");
@@ -194,23 +249,29 @@ int main(int argc, char **argv)
 
 		//split the buffer by delimiters to read a single word
 		word = strtok(line,delimiter); 
-		
+
 		//read the line word by word
 		while(word!=NULL)
 		{
             // You can print the words of the inpit file for Debug purposes, just to make sure you are loading the input text as intended
 			//printf("%s\n",word);
 
-            
             // HINT: Since this nested while loop will keep reading the input text word by word, here is a good place to check for misspelled words
-            
-            
+                        
             // INPUT/OUTPUT SPECS: use the following line for printing a "word" that is misspelled.
             //printf("Misspelled word: %s\n",word);
-            
+                        
             // INPUT/OUTPUT SPECS: use the following line for printing suggestions, each of which will be separated by a comma and whitespace.
             //printf("Suggestions: "); //the suggested words should follow
             
+            if(isMember(myHash, word, hashSize)!=1)
+            {
+              // find suggestions if any
+
+              printf("Misspelled word: %s\n",word);
+              printf("Suggestions: \n");
+              noTypo=-1;
+            }
             
             
 			word = strtok(NULL,delimiter); 
