@@ -9,7 +9,7 @@
   // int value will be char word
 typedef struct node
 {
-  char *word;
+  char word[BUFSIZE];
   struct node *next;
 }Node;
 
@@ -67,7 +67,8 @@ OpenHashTable *initHashTable(int size)
   hashTable->table = malloc(sizeof(Node *)*size);
   for(int i=0; i<size; i++)
   {
-    hashTable->table[i] = NULL;
+    LinkedList *myList = init();
+    hashTable->table[i] = myList->head;
   }
   return hashTable;
 }
@@ -128,7 +129,7 @@ int main(int argc, char **argv)
     /**********************************************************************/
     /**********************************************************************/
 
-    hashSize = numOfWords+BUFSIZE;
+    hashSize = numOfWords + 7;
     OpenHashTable *myHash;
     myHash = initHashTable(hashSize);
 
@@ -148,13 +149,28 @@ int main(int argc, char **argv)
         /**********************************************************************/
         /**********************************************************************/
 
-        insert(myHash, wrd,hashSize);
+        insert(myHash, wrd, hashSize);
 
         /**********************************************************************/
         /**********************************************************************/
     }
     fclose(fp);
-    
+    /**********************************************************************/
+    /**********************************************************************/
+    // Print HashTable
+    for(int k=0; k < hashSize; k++)
+    {
+      printf("Row %d: [",k);
+      Node *ptr = myHash->table[k];
+      while(ptr!=NULL)
+      {
+        printf(" %s",ptr->word);
+        ptr=ptr->next;
+      }
+      printf(" ]\n");
+    }
+    /**********************************************************************/
+    /**********************************************************************/
 	////////////////////////////////////////////////////////////////////
 	//read the input text file word by word
     fp = fopen(inputFilePath, "r");
