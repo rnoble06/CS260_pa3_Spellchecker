@@ -130,6 +130,21 @@ int isMember(OpenHashTable *hashTable, char *word, int size)
   return 0;
 }
 
+void printHashTable(OpenHashTable *hashTable, int hashSize)
+{
+for(int k=0; k < hashSize; k++)
+  {
+    printf("Row %d: [",k);
+    Node *ptr = hashTable->table[k];
+    while(ptr!=NULL)
+    {
+      printf(" %s",ptr->word);
+      ptr=ptr->next;
+    }
+    printf(" ]\n");
+  }
+}
+
 /**********************************************************************/
 int main(int argc, char **argv)
 {
@@ -202,30 +217,6 @@ int main(int argc, char **argv)
     }
     fclose(fp);
 
-
-
-    /**********************************************************************/
-    /**********************************************************************/
-    // Print HashTable
-    /*
-    for(int k=0; k < hashSize; k++)
-    {
-      printf("Row %d: [",k);
-      Node *ptr = myHash->table[k];
-      while(ptr!=NULL)
-      {
-        printf(" %s",ptr->word);
-        ptr=ptr->next;
-      }
-      printf(" ]\n");
-    }
-    */
-     //printf("Number of positions in hash table %d\n",hashSize);
-    /**********************************************************************/
-    /**********************************************************************/
-
-
-
 	////////////////////////////////////////////////////////////////////
 	//read the input text file word by word
     fp = fopen(inputFilePath, "r");
@@ -264,13 +255,17 @@ int main(int argc, char **argv)
             // INPUT/OUTPUT SPECS: use the following line for printing suggestions, each of which will be separated by a comma and whitespace.
             //printf("Suggestions: "); //the suggested words should follow
             
+            
             if(isMember(myHash, word, hashSize)!=1)
             {
-              // find suggestions if any
-
               printf("Misspelled word: %s\n",word);
               printf("Suggestions: \n");
               noTypo=-1;
+
+              if(insertToDictionary==1)
+              {
+                insert(myHash, word, hashSize);
+              }
             }
             
             
