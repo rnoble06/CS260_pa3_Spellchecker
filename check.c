@@ -258,17 +258,39 @@ int main(int argc, char **argv)
             
             if(isMember(myHash, word, hashSize)!=1)
             {
+              //-------------suggestions here-------------
+              //-----------place each in a list-----------
+              //--------print list for each suggestion------
+
+              // if extra at beginning
+                // hash for 2 to n chars of word. exact match
+                // if match add to list else continue
+
+              // if extra at end
+                // hash for 1 to n-1 chars of word. exact match
+                // if match add to list else continue
+
+              // if missing beginning
+                // test for each case single letter a-z before word. exact match needed. may have more than 1
+
+              // if missing end
+                // test for each case single letter a-z after word. exact match needed. may have more than 1
+
+              // if chars are swapped
+                // hash should be the same, look for same # of chars and same chars in each. may have more than 1
+
+
               printf("Misspelled word: %s\n",word);
               printf("Suggestions: \n");
               noTypo=-1;
 
+              // if add is specified
               if(insertToDictionary==1)
               {
                 insert(myHash, word, hashSize);
               }
+
             }
-            
-            
 			word = strtok(NULL,delimiter); 
 		}
 	}
