@@ -52,6 +52,33 @@ Node *locate(LinkedList *myList, char *word)
   return NULL;
 }
 
+void deleteFromHead(LinkedList *myList)
+{
+  if(myList->head!=NULL)
+  {
+    Node *ptr = myList->head;
+    myList->head=myList->head->next;
+    free(ptr);
+  }
+}
+
+void deleteSublist(Node *mySublist)
+{
+  if(mySublist->next!=NULL)
+  {
+    deleteSublist(mySublist->next);
+  }
+  free(mySublist);
+}
+
+void deleteList(LinkedList *myList)
+{
+  if(myList->head!=NULL)
+    {
+      deleteSublist(myList->head);
+    }
+  myList->head=NULL;
+}
 void printList(LinkedList *myList)
 {
   if(myList->head==NULL)
@@ -155,71 +182,71 @@ int main(int argc, char **argv)
   int hashSize=0;
 
 	int insertToDictionary;
-	if(strcmp(check,"add")==0)
+  if(strcmp(check,"add")==0)
 		insertToDictionary = 1;
 	else
 		insertToDictionary = 0;
     
 	////////////////////////////////////////////////////////////////////
 	//read dictionary file
-    FILE *fp = fopen(dictionaryFilePath, "r");
-    char *line = NULL; //variable to be used for line counting
-    size_t lineBuffSize = 0; //variable to be used for line counting
-    ssize_t lineSize; //variable to be used for line counting
+  FILE *fp = fopen(dictionaryFilePath, "r");
+  char *line = NULL; //variable to be used for line counting
+  size_t lineBuffSize = 0; //variable to be used for line counting
+  ssize_t lineSize; //variable to be used for line counting
 
-    //check if the file is accessible, just to make sure...
-    if(fp == NULL)
-    {
-        fprintf(stderr, "Error opening file\n");
-        exit(1);
-    }
+  //check if the file is accessible, just to make sure...
+  if(fp == NULL)
+  {
+      fprintf(stderr, "Error opening file\n");
+      exit(1);
+  }
 
-    //First, let's count number of words in the dictionary.
-    //This will help us know how much memory to allocate for our hash table
-    while((lineSize = getline(&line,&lineBuffSize,fp)) !=-1)
-        numOfWords++;
+  //First, let's count number of words in the dictionary.
+  //This will help us know how much memory to allocate for our hash table
+  while((lineSize = getline(&line,&lineBuffSize,fp)) !=-1)
+      numOfWords++;
 
-    //Printing line count for debugging purposes.
-    //You can remove this part from your submission.
-    //printf("Number of words in words.txt %d\n",numOfWords);
+  //Printing line count for debugging purposes.
+  //You can remove this part from your submission.
+  //printf("Number of words in words.txt %d\n",numOfWords);
+  
+  //HINT: You can initialize your hash table here, since you know the size of the dictionary
+
+  /**********************************************************************/
+  /**********************************************************************/
+
+  hashSize = numOfWords + 7;
+  OpenHashTable *myHash;
+  myHash = initHashTable(hashSize);
+
+  /**********************************************************************/
+  /**********************************************************************/
+
+  //rewind file pointer to the beginning of the file, to be able to read it line by line.
+  fseek(fp, 0, SEEK_SET);
+
+  char wrd[BUFSIZE];
+  for (int i = 0; i < numOfWords; i++)
+  {
+    fscanf(fp, "%s \n", wrd);
+    //You can print the words for Debug purposes, just to make sure you are loading the dictionary as intended
+    //printf("%d: %s\n",i,wrd);
     
-    //HINT: You can initialize your hash table here, since you know the size of the dictionary
+    //HINT: here is a good place to insert the words into your hash table
 
     /**********************************************************************/
     /**********************************************************************/
 
-    hashSize = numOfWords + 7;
-    OpenHashTable *myHash;
-    myHash = initHashTable(hashSize);
+    insert(myHash, wrd, hashSize);
 
     /**********************************************************************/
     /**********************************************************************/
-
-    //rewind file pointer to the beginning of the file, to be able to read it line by line.
-    fseek(fp, 0, SEEK_SET);
-
-    char wrd[BUFSIZE];
-    for (int i = 0; i < numOfWords; i++)
-    {
-        fscanf(fp, "%s \n", wrd);
-        //You can print the words for Debug purposes, just to make sure you are loading the dictionary as intended
-        //printf("%d: %s\n",i,wrd);
-        
-        //HINT: here is a good place to insert the words into your hash table
-
-        /**********************************************************************/
-        /**********************************************************************/
-
-        insert(myHash, wrd, hashSize);
-
-        /**********************************************************************/
-        /**********************************************************************/
-    }
-    fclose(fp);
+  }
+  fclose(fp);
 
 	////////////////////////////////////////////////////////////////////
 	//read the input text file word by word
-    fp = fopen(inputFilePath, "r");
+  fp = fopen(inputFilePath, "r");
 	
 	//check if the file is accessible, just to make sure...
 	if(fp == NULL)
@@ -235,7 +262,7 @@ int main(int argc, char **argv)
 	while((lineSize = getline(&line,&lineBuffSize,fp)) !=-1)
 	{
 		char *word;
-        //These are the delimiters you are expected to check for. Nothing else is needed here.
+    //These are the delimiters you are expected to check for. Nothing else is needed here.
 		const char delimiter[]= " ,.:;!\n";
 
 		//split the buffer by delimiters to read a single word
@@ -244,64 +271,114 @@ int main(int argc, char **argv)
 		//read the line word by word
 		while(word!=NULL)
 		{
-            // You can print the words of the inpit file for Debug purposes, just to make sure you are loading the input text as intended
+      // You can print the words of the inpit file for Debug purposes, just to make sure you are loading the input text as intended
 			//printf("%s\n",word);
 
-            // HINT: Since this nested while loop will keep reading the input text word by word, here is a good place to check for misspelled words
-                        
-            // INPUT/OUTPUT SPECS: use the following line for printing a "word" that is misspelled.
-            //printf("Misspelled word: %s\n",word);
-                        
-            // INPUT/OUTPUT SPECS: use the following line for printing suggestions, each of which will be separated by a comma and whitespace.
-            //printf("Suggestions: "); //the suggested words should follow
-            
-            
-            if(isMember(myHash, word, hashSize)!=1)
-            {
-              //-------------suggestions here-------------
-              //-----------place each in a list-----------
-              //--------print list for each suggestion------
+      // HINT: Since this nested while loop will keep reading the input text word by word, here is a good place to check for misspelled words
+                  
+      // INPUT/OUTPUT SPECS: use the following line for printing a "word" that is misspelled.
+      //printf("Misspelled word: %s\n",word);
+                  
+      // INPUT/OUTPUT SPECS: use the following line for printing suggestions, each of which will be separated by a comma and whitespace.
+      //printf("Suggestions: "); //the suggested words should follow
+      
+      if(isMember(myHash, word, hashSize)!=1)
+      {
+        int i=0;
+        char sugWord[strlen(word)-1];
+        //-------------suggestions here-------------
+        //-----------place each in a list-----------
+        //--------print list for each suggestion------
+        // create suggestionList
+        LinkedList *suggestionList;
+        suggestionList = init();
+        // if extra at beginning
+          // hash for 2 to n chars of word. exact match
+          // if match add to list else continue
+        while(word[i+1]!='\0')
+        {
+          sugWord[i]=word[i+1];
+          i++;
+        }
+        sugWord[strlen(word)-1]=word[strlen(word)];
+        sugWord[strlen(word)]='\0';
 
-              // if extra at beginning
-                // hash for 2 to n chars of word. exact match
-                // if match add to list else continue
+        if(isMember(myHash, sugWord, hashSize)==1)
+        {
+          insertToHead(suggestionList, sugWord);
+        }
+        // if extra at end
+          // hash for 1 to n-1 chars of word. exact match
+          // if match add to list else continue
+        strncpy(sugWord,word,strlen(word)-1);
+        sugWord[strlen(word)-1]='\0';
+        if(isMember(myHash, sugWord, hashSize)==1)
+        {
+          insertToHead(suggestionList, sugWord);
+        }
+        char sugWordM1[strlen(word)+1];
+        // if missing beginning
+          // test for each case single letter a-z before word. exact match needed. may have more than 1
+        for(int a=97; a<=122; a++)
+        {
+          // In front
+          int i=0;
+          sugWord[0]=a;
+          while(word[i]!='\0')
+          {
+            sugWord[i+1]=word[i];
+            i++;
+          }
+          sugWord[strlen(word)+1]='\0';
+          if(isMember(myHash, sugWord, hashSize)==1)
+          {
+            insertToHead(suggestionList, sugWord);
+          }
 
-              // if extra at end
-                // hash for 1 to n-1 chars of word. exact match
-                // if match add to list else continue
+          // At end
+          i=0;
+          while(word[i]!='\0')
+          {
+            sugWord[i]=word[i];
+            i++;
+          }
+          sugWord[strlen(word)]=a;
+          sugWord[strlen(word)+1]='\0';
+          if(isMember(myHash, sugWord, hashSize)==1)
+          {
+            insertToHead(suggestionList, sugWord);
+          }
+        }
 
-              // if missing beginning
-                // test for each case single letter a-z before word. exact match needed. may have more than 1
-
-              // if missing end
-                // test for each case single letter a-z after word. exact match needed. may have more than 1
-
-              // if chars are swapped
-                // hash should be the same, look for same # of chars and same chars in each. may have more than 1
+        // if chars are swapped
+          // hash should be the same, look for same # of chars and same chars in each. may have more than 1
+        
 
 
-              printf("Misspelled word: %s\n",word);
-              printf("Suggestions: \n");
-              noTypo=-1;
+        printf("Misspelled word: %s\n",word);
+        printf("Suggestions: \n");
+        noTypo=-1;
 
-              // if add is specified
-              if(insertToDictionary==1)
-              {
-                insert(myHash, word, hashSize);
-              }
-
-            }
+        // if add is specified
+        if(insertToDictionary==1)
+        {
+          insert(myHash, word, hashSize);
+        }
+        //printList(suggestionList);
+        // release suggestionList
+        deleteList(suggestionList);
+      }
 			word = strtok(NULL,delimiter); 
 		}
-	}
+	} 
+
 	fclose(fp);
     
-    //HINT: If the flag noTypo is not altered (which you should do in the loop above if there exists a word not in the dictionary), then you should print "No typo!"
-    if(noTypo==1)
-        printf("No typo!\n");
-    
+  //HINT: If the flag noTypo is not altered (which you should do in the loop above if there exists a word not in the dictionary), then you should print "No typo!"
+  if(noTypo==1)
+    printf("No typo!\n");
 
-    // DON'T FORGET to free the memory that you allocated
+  // DON'T FORGET to free the memory that you allocated
     
 	return 0;
 }
