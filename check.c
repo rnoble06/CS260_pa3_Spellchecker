@@ -6,13 +6,13 @@
 /**********************************************************************/
 
 // linked list -------------------------------------------------------
-  // int value will be char word
 typedef struct node
 {
   char word[BUFSIZE];
   struct node *next;
 }Node;
 
+//initialize node
 Node *initNode(char *word, Node *next)
 {
   Node *newNode = malloc(sizeof(Node));
@@ -26,6 +26,7 @@ typedef struct linkedList
   Node *head;
 }LinkedList;
 
+// initialize list
 LinkedList *init()
 {
   LinkedList *newList = malloc(sizeof(LinkedList));
@@ -33,12 +34,14 @@ LinkedList *init()
   return newList;
 }
 
+// insert to head of list
 void insertToHead(LinkedList *myList, char *word)
 {
   Node *newNode=initNode(word, myList->head);
   myList->head = newNode;
 }
 
+// find word in list
 Node *locate(LinkedList *myList, char *word)
 {
   Node *ptr = myList->head;
@@ -52,6 +55,7 @@ Node *locate(LinkedList *myList, char *word)
   return NULL;
 }
 
+//delete from head
 void deleteFromHead(LinkedList *myList)
 {
   if(myList->head!=NULL)
@@ -62,6 +66,7 @@ void deleteFromHead(LinkedList *myList)
   }
 }
 
+//delete sublist
 void deleteSublist(Node *mySublist)
 {
   if(mySublist->next!=NULL)
@@ -71,6 +76,7 @@ void deleteSublist(Node *mySublist)
   free(mySublist);
 }
 
+//delete list
 void deleteList(LinkedList *myList)
 {
   if(myList->head!=NULL)
@@ -79,6 +85,8 @@ void deleteList(LinkedList *myList)
     }
   myList->head=NULL;
 }
+
+// print list
 void printList(LinkedList *myList)
 {
   if(myList->head==NULL)
@@ -94,9 +102,24 @@ void printList(LinkedList *myList)
   }
 }
 
-// open hash----------------------------------------------------------
-  // int value will be char word
+// print suggestions
+void printSuggestions(LinkedList *myList)
+{
+  if(myList->head==NULL)
+  {
+    printf("empty list!!!\n");
+    return;
+  }
+  Node *ptr = myList->head;
+  while(ptr!=NULL)
+  {
+    printf("%s ",ptr->word);
+    ptr=ptr->next;
+  }
+}
 
+// open hash----------------------------------------------------------
+//hash word
 int hashWord(char *word, int size)
 {
   unsigned int total=0;
@@ -114,6 +137,7 @@ typedef struct openHashTable
   Node **table;
 }OpenHashTable;
 
+// initialize hash table
 OpenHashTable *initHashTable(int size)
 {
   OpenHashTable *hashTable = malloc(sizeof(OpenHashTable));
@@ -127,6 +151,7 @@ OpenHashTable *initHashTable(int size)
   return hashTable;
 }
 
+// insert word to hash table
 void insert(OpenHashTable *hashTable, char *word,int size)
 {
   int position = hashWord(word,size);
@@ -140,9 +165,7 @@ void insert(OpenHashTable *hashTable, char *word,int size)
   }
   hashTable->table[position] = initNode(word, hashTable->table[position]);
 }
-
-// open hash isMember--------------------------------------------------
-
+// isMember check
 int isMember(OpenHashTable *hashTable, char *word, int size)
 {
   int position = hashWord(word, size);
@@ -157,6 +180,7 @@ int isMember(OpenHashTable *hashTable, char *word, int size)
   return 0;
 }
 
+// print hash table
 void printHashTable(OpenHashTable *hashTable, int hashSize)
 {
 for(int k=0; k < hashSize; k++)
@@ -170,6 +194,49 @@ for(int k=0; k < hashSize; k++)
     }
     printf(" ]\n");
   }
+}
+
+// check is characters are swapped. if match then add suggestion.
+void isSwapped(char *word, LinkedList *myList, OpenHashTable *hashTable, int hashSize)
+{
+  int lenWord=strlen(word);
+  int i=0;
+  char sugWord[strlen(word)];
+  while(word[i+1] != '\0')
+  {
+    strcpy(sugWord,word);
+    sugWord[strlen(word)]='\0';
+    sugWord[i+1]=word[i];
+    sugWord[i]=word[i+1];
+    
+    if(isMember(hashTable, sugWord, hashSize)==1)
+    {
+      insertToHead(myList, sugWord);
+    }
+    i++;
+  }
+}
+
+void deleteHashTable(OpenHashTable *hashTable, int hashSize)
+{
+  Node *tmp;
+  Node *ptr;
+  for (int i = 0; i < hashSize; i++)
+  {
+    if (hashTable->table[i] != NULL)
+    {
+      ptr = hashTable->table[i];
+      while (ptr != NULL)
+      {
+        tmp = ptr;
+        ptr = ptr->next;
+        free(tmp);
+      }
+      free(ptr);
+    }
+  }
+  free(hashTable->table);
+  free(hashTable);
 }
 
 /**********************************************************************/
@@ -213,13 +280,9 @@ int main(int argc, char **argv)
   //HINT: You can initialize your hash table here, since you know the size of the dictionary
 
   /**********************************************************************/
-  /**********************************************************************/
-
   hashSize = numOfWords + 7;
   OpenHashTable *myHash;
   myHash = initHashTable(hashSize);
-
-  /**********************************************************************/
   /**********************************************************************/
 
   //rewind file pointer to the beginning of the file, to be able to read it line by line.
@@ -235,12 +298,9 @@ int main(int argc, char **argv)
     //HINT: here is a good place to insert the words into your hash table
 
     /**********************************************************************/
-    /**********************************************************************/
-
     insert(myHash, wrd, hashSize);
+    /**********************************************************************/
 
-    /**********************************************************************/
-    /**********************************************************************/
   }
   fclose(fp);
 
@@ -352,11 +412,13 @@ int main(int argc, char **argv)
 
         // if chars are swapped
           // hash should be the same, look for same # of chars and same chars in each. may have more than 1
+        isSwapped(word,suggestionList, myHash, hashSize);
         
 
-
         printf("Misspelled word: %s\n",word);
-        printf("Suggestions: \n");
+        printf("Suggestions: ");
+        printSuggestions(suggestionList);
+        printf("\n");
         noTypo=-1;
 
         // if add is specified
@@ -379,6 +441,6 @@ int main(int argc, char **argv)
     printf("No typo!\n");
 
   // DON'T FORGET to free the memory that you allocated
-    
+  deleteHashTable(myHash, hashSize);
 	return 0;
 }
